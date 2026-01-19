@@ -1,0 +1,115 @@
+"my-expo-app/  
+├── .expo/                     # Expo cache (git‑ignore)  
+├── .github/                    # CI/CD workflows  
+├── assets/                     # Static assets  
+│   ├── fonts/                  # Custom fonts (.ttf, .otf)  
+│   ├── images/                 # Icons, illustrations, splash screens  
+│   └── icons/                  # Tab bar / button icons  
+│
+├── config/                     # Configuration files  
+│   ├── environments/           # Environment‑specific configs  
+│   │   ├── dev.env  
+│   │   ├── prod.env  
+│   │   └── staging.env  
+│   ├── app.config.js           # Expo dynamic config (uses env vars)  
+│   └── react-native-config.js  # For react-native-config  
+│
+├── app/                        # ⭐⭐ SOURCE ROOT ⭐⭐  
+│   │
+│   ├── (auth)/                 # Expo Router: Auth STACK  
+│   │   ├── login.tsx  
+│   │   ├── signup.tsx  
+│   │   └── _layout.tsx         # Layout for auth stack  
+│   │
+│   ├── (tabs)/                 # Expo Router: TAB NAVIGATOR  
+│   │   ├── home.tsx  
+│   │   ├── profile.tsx  
+│   │   ├── settings.tsx  
+│   │   └── _layout.tsx         # Tab navigator definition  
+│   │
+│   ├── _layout.tsx             # ✅ ROOT LAYOUT (wraps whole app)  
+│   │
+│   ├── common/                 # ⚙️ SHARED / CROSS‑CUTTING CODE  
+│   │   ├── components/         # ✅ Reusable UI components  
+│   │   │   ├── Button/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Button.styles.ts
+│   │   │   │   └── __tests__/
+│   │   │   ├── Input/
+│   │   │   ├── Card/
+│   │   │   └── index.ts        # Barrel export  
+│   │   │
+│   │   ├── hooks/              # Global hooks (NOT feature‑specific)  
+│   │   │   ├── useDebounce.ts
+│   │   │   ├── useNetworkStatus.ts
+│   │   │   └── useSafeArea.ts
+│   │   │
+│   │   ├── styles/             # Global styling system  
+│   │   │   ├── theme.ts        # Colors, spacing, fonts, radii, etc.  
+│   │   │   ├── typography.ts  
+│   │   │   └── globalStyles.ts
+│   │   │
+│   │   ├── utils/              # Helper functions  
+│   │   │   ├── formatters.ts
+│   │   │   ├── validators.ts
+│   │   │   └── index.ts
+│   │   │
+│   │   └── constants/          # App‑wide constants  
+│   │       ├── apiEndpoints.ts
+│   │       └── appConfig.ts
+│   │
+│   ├── features/               # ⭐ FEATURE‑BASED MODULES (Domain‑Driven)  
+│   │   ├── auth/               # Authentication feature  
+│   │   │   ├── screens/        # (Optional – if you prefer screens here)  
+│   │   │   ├── components/     # Auth‑specific components  
+│   │   │   ├── hooks/          # Feature‑specific hooks  
+│   │   │   │   └── useLogin.ts
+│   │   │   ├── services/       # API calls for auth  
+│   │   │   │   └── authService.ts
+│   │   │   └── types/          # Types/interfaces for auth  
+│   │   │       └── authTypes.ts
+│   │   │
+│   │   ├── home/               # Home feature  
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── services/
+│   │   │   └── types/
+│   │   │
+│   │   ├── profile/            # Profile feature  
+│   │   │   └── …  
+│   │   │
+│   │   └── **\*                # Add new features here!  
+│   │
+│   ├── services/               # 📡 GLOBAL API LAYER  
+│   │   ├── apiClient.ts        # Axios instance + interceptors  
+│   │   └── api.ts              # Export all API methods  
+│   │
+│   ├── store/                  # 🗃️ STATE MANAGEMENT (Redux Toolkit / Zustand)  
+│   │   ├── slices/             # Redux slices  
+│   │   │   ├── authSlice.ts
+│   │   │   └── userSlice.ts
+│   │   ├── middleware/
+│   │   ├── store.ts            # Store configuration  
+│   │   └── hooks.ts            # useAppDispatch, useAppSelector  
+│   │
+│   ├── navigation/             # (If **NOT** using Expo Router)  
+│   │   ├── AppNavigator.tsx  
+│   │   ├── AuthNavigator.tsx  
+│   │   └── types.ts           # Navigation type definitions  
+│   │
+│   └── __tests__/              # ✅ TESTS (Jest / React Testing Library)  
+│       ├── common/
+│       ├── features/
+│       └── integration/
+│
+├── .env                       # Root env variables (git‑ignore!)  
+├── .eslintrc.js  
+├── .prettierrc.js  
+├── .gitignore  
+├── app.json                   # (Optional – config can live in app.config.js)  
+├── babel.config.js  
+├── jest.config.js  
+├── package.json  
+├── package-lock.json (or yarn.lock)  
+├── README.md  
+└── tsconfig.json               # TypeScript config" 
