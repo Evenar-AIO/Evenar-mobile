@@ -5,9 +5,18 @@ import { HelloWave } from '@/components/hello-wave';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { AuthButton } from '@/features/auth/components/AuthButton';
+import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
+import { Link, router } from 'expo-router';
 
 export default function HomeScreen() {
+  const { logoutAction } = useAuthActions();
+
+  const onLogout = async () => {
+    await logoutAction();
+    router.replace('/login');
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -74,6 +83,10 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
+
+      <ThemedView style={styles.logoutContainer}>
+        <AuthButton title="Đăng xuất" onPress={onLogout} />
+      </ThemedView>
     </ParallaxScrollView>
   );
 }
@@ -94,5 +107,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute',
+  },
+  logoutContainer: {
+    marginTop: 16,
   },
 });
