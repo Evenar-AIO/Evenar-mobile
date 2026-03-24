@@ -1,19 +1,28 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { authService } from '@/features/auth/services/authService';
+import { ApiError, request } from '@/services/apiClient';
 
-const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
-  timeout: 10000,
-});
+type ApiResponse<T> = { data: T };
 
-api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('accessToken');
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  body?: unknown;
+};
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+async function apiRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
+  const data = await request<T>(endpoint, {
+    method: options.method ?? 'GET',
+    body: options.body,
+  });
 
-  return config;
-});
+  return { data };
+}
 
+const api = {
+  get: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'GET' }),
+  post: <T>(endpoint: string, body?: unknown) => apiRequest<T>(endpoint, { method: 'POST', body }),
+  put: <T>(endpoint: string, body?: unknown) => apiRequest<T>(endpoint, { method: 'PUT', body }),
+  delete: <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'DELETE' }),
+};
+
+export { ApiError, authService };
 export default api;

@@ -2,17 +2,31 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { useAuthStore } from '@/store/store';
+
 export default function TabLayout() {
+  const { state } = useAuthStore();
+  const isAdmin = state.user?.role === 'admin';
+
   return (
     <Tabs
       screenOptions={{
         headerShown: true,
-        tabBarActiveTintColor: '#2563eb',
+        tabBarActiveTintColor: '#a855f7',
+        tabBarStyle: {
+          backgroundColor: '#0b0a14',
+          borderTopColor: 'rgba(255, 255, 255, 0.08)',
+        },
+        headerStyle: {
+          backgroundColor: '#0b0a14',
+        },
+        headerTintColor: '#ffffff',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
+          headerShown: false,
           title: 'Home',
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons
@@ -27,7 +41,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="events"
         options={{
-          title: 'Events',
+          headerShown: false,
+          title: 'Explore',
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons
               name={focused ? 'calendar' : 'calendar-outline'}
@@ -45,6 +60,21 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons
               name={focused ? 'person' : 'person-outline'}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: 'Admin',
+          href: isAdmin ? '/admin/dashboard' : null,
+          tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
+            <Ionicons
+              name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'}
               size={22}
               color={color}
             />

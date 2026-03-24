@@ -44,7 +44,7 @@ export default function CreateEventScreen() {
 
       Alert.alert('Success', 'Event created successfully');
       router.replace('/owner/event');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Create event failed');
     }
   };

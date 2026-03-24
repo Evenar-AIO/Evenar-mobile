@@ -5,25 +5,96 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = '#4f46e5';
+const tintColorDark = '#a855f7';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    text: '#0f172a',
+    textSecondary: '#475569',
+    textMuted: '#64748b',
+    textInverse: '#ffffff',
+    background: '#ffffff',
+    surface0: 'rgba(15, 23, 42, 0.02)',
+    surface1: 'rgba(15, 23, 42, 0.04)',
+    surface2: 'rgba(15, 23, 42, 0.08)',
+    surface3: 'rgba(15, 23, 42, 0.12)',
+    border: 'rgba(15, 23, 42, 0.12)',
+    borderBright: 'rgba(15, 23, 42, 0.2)',
+    accent: '#6366f1',
+    accentAlt: '#d946ef',
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: '#64748b',
+    tabIconDefault: '#64748b',
     tabIconSelected: tintColorLight,
+    success: '#22c55e',
+    warning: '#f59e0b',
+    danger: '#f43f5e',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: '#ffffff',
+    textSecondary: '#94a3b8',
+    textMuted: '#64748b',
+    textInverse: '#07060f',
+    background: '#07060f',
+    surface0: 'rgba(255, 255, 255, 0.02)',
+    surface1: 'rgba(255, 255, 255, 0.04)',
+    surface2: 'rgba(255, 255, 255, 0.08)',
+    surface3: 'rgba(255, 255, 255, 0.12)',
+    border: 'rgba(255, 255, 255, 0.08)',
+    borderBright: 'rgba(255, 255, 255, 0.15)',
+    accent: '#6366f1',
+    accentAlt: '#d946ef',
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    success: '#22c55e',
+    warning: '#f59e0b',
+    danger: '#f43f5e',
+  },
+};
+
+export const Spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  '2xl': 24,
+  '3xl': 32,
+};
+
+export const Radius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  full: 999,
+};
+
+export const Typography = {
+  display: 32,
+  title: 24,
+  subtitle: 18,
+  body: 16,
+  caption: 13,
+};
+
+export const Shadows = {
+  soft: {
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  medium: {
+    shadowColor: '#000',
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
 };
 

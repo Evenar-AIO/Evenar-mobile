@@ -1,21 +1,27 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Alert,
   ActivityIndicator,
-  TouchableOpacity,
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+
 import EventCard from '../components/EventCard';
 import { EventItem } from '../types/event.type';
 import { deleteEvent, getEvents } from '../services/event.service';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function MyEventsScreen() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const theme = useColorScheme() ?? 'dark';
+  const palette = Colors[theme];
 
   const fetchEvents = async () => {
     try {
@@ -62,19 +68,79 @@ export default function MyEventsScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={palette.accent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.createBtn}
+    <ThemedView style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <ThemedText type="title">Owner Center</ThemedText>
+          <ThemedText type="caption" tone="secondary">
+            Manage events, revenue, and requests.
+          </ThemedText>
+        </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.primaryButton,
+            { backgroundColor: palette.accentAlt },
+            pressed && { opacity: 0.9 },
+          ]}
+          onPress={() => router.push('/owner/dashboard')}
+        >
+          <ThemedText type="bodySemiBold" tone="inverse">
+            Dashboard
+          </ThemedText>
+        </Pressable>
+      </View>
+
+      <View style={styles.ctaRow}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            { borderColor: palette.border, backgroundColor: palette.surface1 },
+            pressed && { opacity: 0.9 },
+          ]}
+          onPress={() => router.push('/owner/analytics')}
+        >
+          <ThemedText type="caption">Analytics</ThemedText>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            { borderColor: palette.border, backgroundColor: palette.surface1 },
+            pressed && { opacity: 0.9 },
+          ]}
+          onPress={() => router.push('/owner/buyers')}
+        >
+          <ThemedText type="caption">Buyers</ThemedText>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.secondaryButton,
+            { borderColor: palette.border, backgroundColor: palette.surface1 },
+            pressed && { opacity: 0.9 },
+          ]}
+          onPress={() => router.push('/owner/requests')}
+        >
+          <ThemedText type="caption">Requests</ThemedText>
+        </Pressable>
+      </View>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.createBtn,
+          { backgroundColor: palette.accentAlt },
+          pressed && { opacity: 0.9 },
+        ]}
         onPress={() => router.push('/owner/event/create')}
       >
-        <Text style={styles.createBtnText}>+ Create New Event</Text>
-      </TouchableOpacity>
+        <ThemedText type="bodySemiBold" tone="inverse">
+          + Create New Event
+        </ThemedText>
+      </Pressable>
 
       <FlatList
         data={events}
@@ -86,37 +152,56 @@ export default function MyEventsScreen() {
             onDelete={() => handleDelete(item._id)}
           />
         )}
-        ListEmptyComponent={<Text style={styles.empty}>No events found</Text>}
+        ListEmptyComponent={
+          <ThemedText type="caption" tone="secondary" style={styles.empty}>
+            No events found
+          </ThemedText>
+        }
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
       />
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    padding: Spacing.lg,
+    gap: Spacing.lg,
   },
-  list: {
-    padding: 16,
-  },
-  createBtn: {
-    margin: 16,
-    backgroundColor: '#7c3aed',
-    borderRadius: 12,
-    paddingVertical: 14,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  createBtnText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
+  ctaRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  list: {
+    paddingBottom: Spacing['3xl'],
+  },
+  createBtn: {
+    borderRadius: Radius.full,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    borderRadius: Radius.full,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
+  },
+  secondaryButton: {
+    flex: 1,
+    borderRadius: Radius.full,
+    paddingVertical: Spacing.sm,
+    borderWidth: 1,
+    alignItems: 'center',
   },
   empty: {
     textAlign: 'center',
-    marginTop: 40,
-    color: '#777',
+    marginTop: Spacing.lg,
   },
   center: {
     flex: 1,

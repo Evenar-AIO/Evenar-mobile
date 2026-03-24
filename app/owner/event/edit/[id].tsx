@@ -73,7 +73,7 @@ export default function EditEventScreen() {
 
       Alert.alert('Success', 'Event updated successfully');
       router.replace('/owner/event');
-    } catch (error) {
+    } catch {
       Alert.alert('Notice', 'Backend hiện có thể chưa hỗ trợ PUT /events/:id.');
     }
   };

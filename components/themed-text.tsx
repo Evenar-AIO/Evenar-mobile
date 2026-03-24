@@ -5,26 +5,30 @@ import { useThemeColor } from '@/hooks/use-theme-color';
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  tone?: 'primary' | 'secondary' | 'muted' | 'inverse' | 'accent';
+  type?: 'display' | 'title' | 'subtitle' | 'body' | 'bodySemiBold' | 'caption' | 'link';
 };
 
 export function ThemedText({
   style,
   lightColor,
   darkColor,
-  type = 'default',
+  tone = 'primary',
+  type = 'body',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, toneToColor[tone]);
 
   return (
     <Text
       style={[
         { color },
-        type === 'default' ? styles.default : undefined,
+        type === 'body' ? styles.body : undefined,
+        type === 'bodySemiBold' ? styles.bodySemiBold : undefined,
+        type === 'display' ? styles.display : undefined,
         type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
         type === 'subtitle' ? styles.subtitle : undefined,
+        type === 'caption' ? styles.caption : undefined,
         type === 'link' ? styles.link : undefined,
         style,
       ]}
@@ -33,28 +37,46 @@ export function ThemedText({
   );
 }
 
+const toneToColor = {
+  primary: 'text',
+  secondary: 'textSecondary',
+  muted: 'textMuted',
+  inverse: 'textInverse',
+  accent: 'accent',
+} as const;
+
 const styles = StyleSheet.create({
-  default: {
+  body: {
     fontSize: 16,
     lineHeight: 24,
   },
-  defaultSemiBold: {
+  bodySemiBold: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '600',
   },
-  title: {
+  display: {
     fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
+    lineHeight: 36,
+    fontWeight: '700',
+  },
+  title: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '700',
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '600',
+  },
+  caption: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
+    lineHeight: 22,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
