@@ -30,6 +30,9 @@ export const useCartStore = create<CartState>((set) => ({
     try {
       const data: any = await cartService.getCart();
       set({ items: data?.items ?? data?.data ?? data ?? [] });
+    } catch (err: any) {
+      // If 401 (Unauthorized), just clear the cart locally
+      set({ items: [] });
     } finally {
       set({ loading: false });
     }
@@ -48,7 +51,10 @@ export const useCartStore = create<CartState>((set) => ({
   updateItem: async (ticketInfoId, quantity) => {
     set({ loading: true });
     try {
-      await cartService.updateItem(ticketInfoId, quantity);
+      const data: any = await cartService.updateItem(ticketInfoId, quantity);
+      set({ items: data?.items ?? data?.data ?? data ?? [] });
+    } catch (err: any) {
+      console.error('Update cart item error:', err);
     } finally {
       set({ loading: false });
     }
@@ -56,7 +62,10 @@ export const useCartStore = create<CartState>((set) => ({
   removeItem: async (ticketInfoId) => {
     set({ loading: true });
     try {
-      await cartService.removeItem(ticketInfoId);
+      const data: any = await cartService.removeItem(ticketInfoId);
+      set({ items: data?.items ?? data?.data ?? data ?? [] });
+    } catch (err: any) {
+      console.error('Remove cart item error:', err);
     } finally {
       set({ loading: false });
     }

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { useAuthStore } from '@/store/store';
@@ -7,6 +6,10 @@ import { useAuthStore } from '@/store/store';
 export default function TabLayout() {
   const { state } = useAuthStore();
   const isAdmin = state.user?.role === 'admin';
+  const isOwner = state.user?.role === 'organizer' || state.user?.role === 'event_owner';
+
+  if (isOwner) return <Redirect href="/owner" />;
+  if (isAdmin) return <Redirect href="/admin" />;
 
   return (
     <Tabs
@@ -71,7 +74,7 @@ export default function TabLayout() {
         name="admin"
         options={{
           title: 'Admin',
-          href: isAdmin ? '/admin/dashboard' : null,
+          href: isAdmin ? '/admin' : null,
           tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => (
             <Ionicons
               name={focused ? 'shield-checkmark' : 'shield-checkmark-outline'}
@@ -92,14 +95,41 @@ export default function TabLayout() {
         name="create"
         options={{
           title: 'Create',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle.fill" color={color} />,
+          href: isAdmin ? '/create' : null,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'add-circle' : 'add-circle-outline'}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          headerShown: false,
+          title: 'Tin nhắn',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'chatbubbles' : 'chatbubbles-outline'}
+              size={22}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="orders"
         options={{
           title: 'Orders',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="ticket.fill" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'ticket' : 'ticket-outline'}
+              size={22}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>

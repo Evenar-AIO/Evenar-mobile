@@ -63,7 +63,11 @@ export default function SearchScreen() {
       >
         <View style={styles.cardImgWrap}>
           {item.imageURL ? (
-            <Image source={{ uri: item.imageURL }} style={styles.cardImg} />
+            <Image 
+              source={{ uri: item.imageURL }} 
+              style={styles.cardImg} 
+              resizeMode="cover"
+            />
           ) : (
             <View style={[styles.cardImg, { backgroundColor: palette.surface2, alignItems: 'center', justifyContent: 'center' }]}>
               <Ionicons name="musical-notes-outline" size={32} color={palette.textMuted} />
@@ -243,7 +247,6 @@ const styles = StyleSheet.create({
   cardImg: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   cardBody: {
     gap: 4,

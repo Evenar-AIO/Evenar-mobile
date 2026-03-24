@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 
 export const TicketTypeSelector = ({ type, price, quantity, onAdd, onRemove }: any) => {
   return (
@@ -26,7 +26,25 @@ const styles = StyleSheet.create({
   type: { fontSize: 16, fontWeight: '600' },
   price: { color: '#666', marginTop: 4 },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 15 },
-  btn: { width: 32, height: 32, backgroundColor: '#fff', borderRadius: 16, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } },
+  btn: { 
+    width: 32, 
+    height: 32, 
+    backgroundColor: '#fff', 
+    borderRadius: 16, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+      },
+      default: {
+        shadowColor: '#000', 
+        shadowOpacity: 0.1, 
+        shadowRadius: 2, 
+        shadowOffset: { width: 0, height: 1 } 
+      },
+    }),
+  },
   btnText: { fontSize: 18, fontWeight: 'bold' },
   qty: { fontSize: 16, fontWeight: 'bold', minWidth: 20, textAlign: 'center' }
 });

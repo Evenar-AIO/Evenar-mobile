@@ -2,9 +2,11 @@ export type UserRole = 'admin' | 'customer' | 'event_owner' | 'organizer';
 
 export interface User {
   id: string;
+  _id?: string;
   email: string;
   fullName?: string;
   role: UserRole;
+  avatar?: string;
 }
 
 export interface AuthTokens {

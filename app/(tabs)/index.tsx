@@ -101,7 +101,11 @@ export default function HomeScreen() {
       >
         <View style={styles.cardImgWrap}>
           {item.imageURL ? (
-            <Image source={{ uri: item.imageURL }} style={styles.cardImg} />
+            <Image 
+              source={{ uri: item.imageURL }} 
+              style={styles.cardImg} 
+              resizeMode="cover"
+            />
           ) : (
             <View style={[styles.cardImg, { backgroundColor: palette.surface2, alignItems: 'center', justifyContent: 'center' }]}>
               <Ionicons name="musical-notes-outline" size={32} color={palette.textMuted} />
@@ -281,9 +285,14 @@ const styles = StyleSheet.create({
     fontSize: 34,
     color: '#ffffff',
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
+    ...Platform.select({
+      web: { textShadow: '0 2px 8px rgba(0,0,0,0.8)' },
+      default: {
+        textShadowColor: 'rgba(0,0,0,0.8)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 8,
+      },
+    }),
     marginBottom: 20,
   },
   btnPrimary: {
@@ -339,7 +348,6 @@ const styles = StyleSheet.create({
   cardImg: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   cardBody: {
     paddingRight: 8,
@@ -364,5 +372,51 @@ const styles = StyleSheet.create({
   cardDateText: {
     fontFamily: 'Poppins_400Regular',
     fontSize: 13,
+  },
+
+  /* --- Floating Cart --- */
+  floatingCart: {
+    position: 'absolute',
+    bottom: 80, // slightly above tab bar
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    zIndex: 99,
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.3)',
+      },
+      default: {
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+    }),
+  },
+  floatingCartText: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 15,
+  },
+  floatingCartSubtext: {
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  btnFloatingCart: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  btnFloatingCartTxt: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 14,
+    color: '#fff',
   },
 });

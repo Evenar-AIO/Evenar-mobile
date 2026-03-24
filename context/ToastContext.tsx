@@ -21,14 +21,14 @@ const ToastContext = createContext<ToastContextData | undefined>(undefined);
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toast, setToast] = useState<ToastOptions | null>(null);
   const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(50)).current;
+  const translateY = useRef(new Animated.Value(-100)).current;
   const theme = useColorScheme() ?? 'dark';
   const palette = Colors[theme];
 
   const hideToast = useCallback(() => {
     Animated.parallel([
       Animated.timing(opacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 50, duration: 300, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: -100, duration: 300, useNativeDriver: true }),
     ]).start(() => {
       setToast(null);
     });
@@ -97,7 +97,7 @@ export const useToast = () => {
 const styles = StyleSheet.create({
   toastContainer: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 100 : 80,
+    top: Platform.OS === 'ios' ? 60 : 40,
     left: 20,
     right: 20,
     flexDirection: 'row',
@@ -106,11 +106,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     zIndex: 9999,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 8,
+    ...Platform.select({
+      web: {
+        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 8,
+      },
+    }),
   },
   iconWrap: {
     width: 32,

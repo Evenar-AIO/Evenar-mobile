@@ -15,6 +15,11 @@ import type {
 import { request } from '@/services/apiClient';
 
 export const authService = {
+  getMe: () =>
+    request<any>('/auth/me', {
+      method: 'GET',
+    }),
+
   signupOption: (payload: SignupOptionRequest) =>
     request<SignupOptionResponse>(AUTH_ENDPOINTS.signupOption, {
       method: 'POST',

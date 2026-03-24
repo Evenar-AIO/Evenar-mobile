@@ -19,13 +19,6 @@ export default function ChatListScreen() {
     fetchConversations();
   }, [fetchConversations]);
 
-  useEffect(() => {
-    if (state.accessToken && state.user?._id) {
-      connectSocket(state.accessToken, state.user._id);
-    }
-    return () => disconnectSocket();
-  }, [connectSocket, disconnectSocket, state.accessToken, state.user?._id]);
-
   if (loading) {
     return (
       <ThemedView style={styles.center}>

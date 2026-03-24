@@ -1,8 +1,8 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { WebView } from 'react-native-webview';
-import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import { Link, router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, Modal, SafeAreaView, Text, Platform } from 'react-native';
 
 import { AuthButton } from '@/features/auth/components/AuthButton';
@@ -19,10 +19,37 @@ export default function LoginScreen() {
   const { login } = useAuthActions();
   const { state, setSession } = useAuthStore();
 
+  const { token: urlToken, role: urlRole } = useLocalSearchParams<{ token?: string; role?: string }>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string | null; password?: string | null }>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
+  
+  // Handle URL params (OAuth redirect)
+  useEffect(() => {
+    if (urlToken && urlRole) {
+        handleUrlLogin(urlToken, urlRole);
+    }
+  }, [urlToken, urlRole]);
+
+  const handleUrlLogin = async (token: string, roleStr: string) => {
+    try {
+        const { setAuthToken: setToken } = await import('@/services/apiClient');
+        setToken(token);
+        const userInfo: any = await authService.getMe();
+        const realUser = userInfo?.id ? userInfo : userInfo?.data;
+        
+        await setSession({ 
+            user: realUser || { id: 'google', email: '...', role: roleStr as any }, 
+            accessToken: token 
+        });
+
+        const target = roleStr === 'admin' ? '/admin' : (roleStr === 'organizer' || roleStr === 'event_owner') ? '/owner' : '/(tabs)';
+        router.replace(target);
+    } catch (err) {
+        console.error('URL Login failed', err);
+    }
+  };
   
   const [showGoogleAuth, setShowGoogleAuth] = useState(false);
   const [googleAuthUrl, setGoogleAuthUrl] = useState<string | null>(null);
@@ -41,7 +68,9 @@ export default function LoginScreen() {
       const response = await login({ email: email.trim(), password });
       setPassword('');
       if (response.user.role === 'admin') {
-        router.replace('/admin/dashboard');
+        router.replace('/admin');
+      } else if (response.user.role === 'organizer' || response.user.role === 'event_owner') {
+        router.replace('/owner');
       } else {
         router.replace('/(tabs)');
       }
@@ -56,26 +85,17 @@ export default function LoginScreen() {
 
       if (response.tokens?.accessToken && response.user) {
         await setSession({ user: response.user, accessToken: response.tokens.accessToken });
-        router.replace(response.user.role === 'admin' ? '/admin/dashboard' : '/(tabs)');
+        const role = response.user.role;
+        const target = role === 'admin' ? '/admin' : (role === 'organizer' || role === 'event_owner') ? '/owner' : '/(tabs)';
+        router.replace(target);
         return;
       }
 
       if (response.url) {
         if (Platform.OS === 'web') {
-          const result = await WebBrowser.openAuthSessionAsync(response.url, 'http://localhost:5174');
-          if (result.type === 'success' && result.url) {
-            const urlStr = result.url;
-            const tokenMatch = urlStr.match(/token=([^&]+)/);
-            const roleMatch = urlStr.match(/role=([^&]+)/);
-            if (tokenMatch && tokenMatch[1]) {
-              const token = tokenMatch[1];
-              const roleStr = roleMatch ? roleMatch[1] : 'Customer';
-              const userObj = { id: 'google', email: 'GoogleUser', role: roleStr as any };
-              await setSession({ user: userObj, accessToken: token });
-              router.replace(roleStr === 'admin' ? '/admin/dashboard' : '/(tabs)');
-              return;
-            }
-          }
+          // On Web, use direct redirect instead of popup to avoid "new tab" desync issues.
+          // The useEffect at the top will handle the token when we redirect back.
+          window.location.href = response.url;
           return;
         }
 
@@ -92,19 +112,46 @@ export default function LoginScreen() {
 
   const handleGoogleNavigation = async (navState: any) => {
     const urlStr = navState.url;
-    if (urlStr.startsWith('http://localhost:5174')) {
+    
+    // Detect completion by checking for token in query params
+    const hasToken = urlStr.includes('token=');
+    const hasRole = urlStr.includes('role=');
+
+    if (hasToken && hasRole) {
       setShowGoogleAuth(false);
       const tokenMatch = urlStr.match(/token=([^&]+)/);
       const roleMatch = urlStr.match(/role=([^&]+)/);
+      
       if (tokenMatch && tokenMatch[1]) {
         const token = tokenMatch[1];
-        const roleStr = roleMatch ? roleMatch[1] : 'Customer';
-        const userObj = { id: 'google', email: 'GoogleUser', role: roleStr as any };
-        await setSession({ user: userObj, accessToken: token });
-        router.replace(roleStr === 'admin' ? '/admin/dashboard' : '/(tabs)');
-      } else if (urlStr.includes('error=')) {
-        setGlobalError('Đăng nhập Google thất bại.');
+        const roleStr = roleMatch ? roleMatch[1] : 'customer';
+        
+        setGlobalError(null);
+        // We temporarily don't have the user object yet, so we fetch it
+        try {
+            // Set token manually for the immediate getMe call
+            const { setAuthToken: setToken } = await import('@/services/apiClient');
+            setToken(token);
+            
+            const userInfo: any = await authService.getMe();
+            // User info might be in userInfo.data based on API structure
+            const realUser = userInfo?.id ? userInfo : userInfo?.data;
+            
+            await setSession({ 
+                user: realUser || { id: 'google', email: '...', role: roleStr as any }, 
+                accessToken: token 
+            });
+
+            const target = roleStr === 'admin' ? '/admin' : (roleStr === 'organizer' || roleStr === 'event_owner') ? '/owner' : '/(tabs)';
+            router.replace(target);
+        } catch (err) {
+            console.error('Fetch user after google login failed', err);
+            setGlobalError('Lỗi khi tải thông tin người dùng Google.');
+        }
       }
+    } else if (urlStr.includes('error=')) {
+      setShowGoogleAuth(false);
+      setGlobalError('Đăng nhập Google bị từ chối hoặc thất bại.');
     }
   };
 

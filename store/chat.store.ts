@@ -6,15 +6,20 @@ import { createSocket, type Socket } from '@/services/socket';
 type Conversation = {
   _id: string;
   name?: string;
+  participants?: any[];
   lastMessage?: string;
+  lastMessagePreview?: string;
   lastMessageAt?: string;
+  unreadCount?: number;
 };
 
 type Message = {
   _id: string;
   text?: string;
-  senderId?: string;
+  content?: string;
+  senderId?: any;
   conversationId?: string;
+  attachments?: any[];
   createdAt?: string;
 };
 
@@ -77,7 +82,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
   sendMessage: async (payload) => {
-    await chatService.sendMessage(payload);
+    try {
+      const data: any = await chatService.sendMessage(payload);
+      const message = data?.data ?? data;
+      if (message && message._id) {
+        get().handleIncomingMessage(message);
+      }
+    } catch (err) {
+      console.error('[ChatStore] Send direct message fail:', err);
+    }
   },
   handleIncomingMessage: (message) => {
     set((state) => {

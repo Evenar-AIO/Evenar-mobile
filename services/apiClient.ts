@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import type { ApiSuccessResponse } from '@/features/auth/types/authTypes';
 
 export class ApiError extends Error {
@@ -19,19 +20,15 @@ export function setAuthToken(token: string | null) {
   authToken = token;
 }
 
-const DEFAULT_LAN_IP = '10.13.9.39';
-const RAW_API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  process.env.EXPO_PUBLIC_API_URL ??
-  `http://${DEFAULT_LAN_IP}:3000/api`;
+// Dynamically determine the host's IP (for local dev)
+const debuggerHost = Constants.expoConfig?.hostUri;
+const DEFAULT_LAN_IP = debuggerHost ? debuggerHost.split(':')[0] : 'localhost';
 
-// Only rewrite localhost → LAN IP on native (device/emulator).
-// On web, localhost is correct and reachable.
-const API_BASE_URL = Platform.OS === 'web'
-  ? RAW_API_BASE_URL
-  : RAW_API_BASE_URL
-      .replace('localhost', DEFAULT_LAN_IP)
-      .replace('127.0.0.1', DEFAULT_LAN_IP);
+export const API_BASE_URL = Platform.OS === 'web'
+  ? (process.env.EXPO_PUBLIC_API_BASE_URL ?? `http://localhost:3000/api`)
+  : (process.env.EXPO_PUBLIC_API_BASE_URL ?? `http://${DEFAULT_LAN_IP}:3000/api`);
+
+const RAW_API_BASE_URL = API_BASE_URL; // kept for compatibility with warnings below
 
 if (!process.env.EXPO_PUBLIC_API_BASE_URL && !process.env.EXPO_PUBLIC_API_URL) {
   console.warn(
@@ -60,15 +57,31 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
 
   let response: Response;
   try {
+    const isFormData = body instanceof FormData || (body && typeof body === 'object' && body.constructor.name === 'FormData');
+    let finalBody: BodyInit | undefined = undefined;
+    const requestHeaders: Record<string, string> = {
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(headers as Record<string, string> ?? {}),
+    };
+
+    if (body !== undefined) {
+      if (isFormData || (body && typeof (body as any).append === 'function')) {
+        finalBody = body as any;
+        // CRITICAL: Must not have any Content-Type for FormData on any platform.
+        // Let fetch calculate the multipart boundary.
+        delete requestHeaders['Content-Type'];
+        delete requestHeaders['content-type'];
+      } else {
+        requestHeaders['Content-Type'] = requestHeaders['Content-Type'] ?? 'application/json';
+        finalBody = JSON.stringify(body);
+      }
+    }
+
     response = await fetch(url, {
       ...rest,
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        ...(headers ?? {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers: requestHeaders,
+      body: finalBody,
     });
   } catch (error: any) {
     clearTimeout(timeoutId);

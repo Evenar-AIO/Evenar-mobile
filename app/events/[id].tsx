@@ -1,34 +1,49 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors, Radius, Shadows, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useEventStore } from '@/store/event.store';
 import { useCartStore } from '@/store/cart.store';
 import { useToast } from '@/context/ToastContext';
+import { getEventByIdApi } from '@/features/event/api/event.api';
+import { chatService } from '@/features/customer/services/chat.service';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { events, fetchEvents } = useEventStore();
   const { addItem } = useCartStore();
   const { showToast } = useToast();
   const theme = useColorScheme() ?? 'dark';
   const palette = Colors[theme];
+  
+  const [event, setEvent] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    if (!events.length) {
-      fetchEvents();
-    }
-  }, [events.length, fetchEvents]);
+    const loadEvent = async () => {
+      try {
+        if (!id) return;
+        setLoading(true);
+        // Use the Public API instead of Admin API
+        const data = await getEventByIdApi(id);
+        setEvent(data);
+      } catch (err) {
+        console.error('Error fetching event detail:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEvent();
+  }, [id]);
 
-  const event = events.find((item) => item._id === id);
-  // Backend returns ticketInfo array, each item has _id, ticketName, price
-  const tiers = useMemo(() => (event as any)?.ticketInfo ?? [], [event]);
+  const tiers = useMemo(() => {
+    return event?.ticketInfo || event?.ticketInfos || event?.tickets || [];
+  }, [event]);
 
   const handleAddToCart = async () => {
     if (!selectedTier || !id) return;
@@ -48,13 +63,38 @@ export default function EventDetailScreen() {
     setAdding(true);
     try {
       await addItem(id, selectedTier, 1);
-      router.push('/checkout');
+      router.push('/cart');
     } catch (err: any) {
       showToast({ message: 'Lỗi: ' + (err.message || 'Không thể mua ngay'), type: 'error' });
     } finally {
       setAdding(false);
     }
   };
+
+  const handleChat = async () => {
+    if (!event?.ownerId) {
+      const msg = !event ? "Đang tải dữ liệu..." : "Chủ sự kiện chưa cập nhật thông tin liên hệ";
+      showToast({ message: msg, type: 'error' });
+      return;
+    }
+    try {
+      const conv: any = await chatService.createConversation({ otherUserId: event.ownerId });
+      const conversationId = conv?.data?._id || conv?._id;
+      if (conversationId) {
+        router.push({ pathname: '/chat/[id]', params: { id: conversationId } });
+      }
+    } catch (err: any) {
+      showToast({ message: 'Không thể kết nối với chủ sự kiện', type: 'error' });
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color={palette.accentAlt} />
+      </View>
+    );
+  }
 
   if (!event) {
     return (
@@ -79,11 +119,21 @@ export default function EventDetailScreen() {
           <ThemedText type="caption" tone="secondary">
             {event.physicalLocation ?? 'Vietnam'} · {new Date(event.startTime).toLocaleDateString()}
           </ThemedText>
+          
+          <Pressable 
+            style={({ pressed }) => [styles.chatButtonRow, pressed && { opacity: 0.7 }]}
+            onPress={handleChat}
+          >
+            <View style={styles.chatIconWrap}>
+              <Ionicons name="chatbubble-ellipses" size={18} color={palette.accentAlt} />
+            </View>
+            <ThemedText style={styles.chatLink}>Nhắn tin cho ban tổ chức</ThemedText>
+          </Pressable>
         </View>
 
         <View style={[styles.infoCard, { backgroundColor: palette.surface1, borderColor: palette.border }]}>
           <ThemedText type="subtitle">About</ThemedText>
-          <ThemedText type="caption" tone="secondary">
+          <ThemedText style={{ color: palette.textSecondary, fontSize: 13, lineHeight: 20 }}>
             {event.description ?? 'Ticketing and experience details coming soon.'}
           </ThemedText>
         </View>
@@ -118,11 +168,11 @@ export default function EventDetailScreen() {
               <View style={{ flex: 1, paddingRight: 12 }}>
                 <ThemedText type="subtitle">{tier.ticketName ?? 'General Admission'}</ThemedText>
                 <ThemedText type="caption" tone="secondary">
-                  {tier.ticketDescription ?? 'Instant confirmation'}
+                   {`Còn lại: ${tier.available ?? 0} vé`}
                 </ThemedText>
               </View>
               <ThemedText type="subtitle" tone="accent">
-                {tier.price ? `${tier.price}đ` : 'TBA'}
+                {tier.price ? `${new Intl.NumberFormat('vi-VN').format(tier.price)}đ` : 'TBA'}
               </ThemedText>
             </Pressable>
           ))
@@ -141,24 +191,22 @@ export default function EventDetailScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.primaryButton,
-              { backgroundColor: palette.accentAlt },
-              pressed && { opacity: 0.9 },
+              { backgroundColor: palette.accentAlt, opacity: !selectedTier ? 0.5 : (pressed ? 0.9 : 1) },
             ]}
             onPress={handleAddToCart}
-            disabled={!selectedTier}
+            disabled={!selectedTier || adding}
           >
             <ThemedText type="bodySemiBold" tone="inverse">
-              Add to cart
+              {adding ? 'Adding...' : 'Add to cart'}
             </ThemedText>
           </Pressable>
           <Pressable
             style={({ pressed }) => [
               styles.secondaryButton,
-              { borderColor: palette.border, backgroundColor: palette.surface1 },
-              pressed && { opacity: 0.9 },
+              { borderColor: palette.border, backgroundColor: palette.surface1, opacity: !selectedTier ? 0.5 : (pressed ? 0.9 : 1) },
             ]}
             onPress={handleBuyNow}
-            disabled={!selectedTier}
+            disabled={!selectedTier || adding}
           >
             <ThemedText type="bodySemiBold">Buy now</ThemedText>
           </Pressable>
@@ -176,6 +224,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.lg,
+    paddingBottom: 40,
     gap: Spacing.lg,
   },
   heroImage: {
@@ -207,24 +256,50 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: Spacing.md,
+    marginTop: 10,
   },
   primaryButton: {
     flex: 1,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     borderRadius: Radius.full,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   secondaryButton: {
     flex: 1,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     borderRadius: Radius.full,
     borderWidth: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     gap: Spacing.md,
+  },
+  chatButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+    padding: 10,
+    borderRadius: Radius.md,
+    alignSelf: 'flex-start',
+  },
+  chatIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chatLink: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#10B981',
   },
 });

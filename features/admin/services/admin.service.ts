@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { request } from '@/services/apiClient';
 
 export const adminService = {
@@ -7,6 +8,9 @@ export const adminService = {
   lockUser: (id: string) => request(`/admin/users/${id}/lock`, { method: 'POST' }),
   unlockUser: (id: string) => request(`/admin/users/${id}/unlock`, { method: 'POST' }),
   deleteUser: (id: string) => request(`/admin/users/${id}`, { method: 'DELETE' }),
+  getUserById: (id: string) => request(`/admin/users/${id}`),
+  updateUser: (id: string, payload: Record<string, unknown>) =>
+    request(`/admin/users/${id}`, { method: 'PUT', body: payload }),
   getEvents: (params?: Record<string, string | number | boolean>) =>
     request(`/admin/events${params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : ''}`),
   getEventById: (id: string) => request(`/admin/events/${id}`),
@@ -42,4 +46,31 @@ export const adminService = {
       method: 'POST',
       body: { status, rejectionReason },
     }),
+  uploadImage: async (imageUri: string, fileName = 'photo.jpg', type = 'image/jpeg') => {
+    const formData = new FormData();
+    
+    // Web requires a real Blob/File, Native needs a Uri object
+    if (Platform.OS === 'web') {
+      try {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        formData.append('file', blob, fileName);
+      } catch (e) {
+        console.error('Fetch blob failed', e);
+        // Fallback
+        formData.append('file', { uri: imageUri, type, name: fileName } as any);
+      }
+    } else {
+      formData.append('file', {
+        uri: imageUri,
+        type: type,
+        name: fileName,
+      } as any);
+    }
+
+    return request('/upload', {
+      method: 'POST',
+      body: formData as any,
+    });
+  },
 };

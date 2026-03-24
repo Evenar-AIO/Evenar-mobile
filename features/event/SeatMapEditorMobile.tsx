@@ -78,7 +78,13 @@ export const SeatMapEditorMobile = ({ onSave }: SeatMapEditorMobileProps) => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
-          <View style={[styles.sectionItem, { shadowColor: item.color }]}>
+          <View style={[
+            styles.sectionItem, 
+            Platform.select({
+              web: { boxShadow: `0px 4px 10px ${item.color}33` }, // added transparency hex 33
+              default: { shadowColor: item.color }
+            })
+          ]}>
             <View style={[styles.colorStrip, { backgroundColor: item.color }]} />
             <View style={styles.sectionInfo}>
               <Text style={styles.sectionTitle}>{item.title}</Text>
@@ -192,10 +198,17 @@ const styles = StyleSheet.create({
     borderRadius: 16, 
     marginBottom: 16, 
     overflow: 'hidden',
-    elevation: 4,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    ...Platform.select({
+      web: {
+        // boxShadow will be handled in inline style for dynamic color compatibility if needed
+      },
+      default: {
+        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+      },
+    }),
   },
   colorStrip: { width: 6, height: '100%' },
   sectionInfo: { flex: 1, padding: 20 },
