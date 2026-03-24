@@ -36,13 +36,13 @@ if (Platform.OS !== 'web') {
     const mod = require('expo-video');
     useVideoPlayer = mod.useVideoPlayer;
     VideoViewComp = mod.VideoView;
-  } catch {}
+  } catch { }
 }
 
 /* ---------- Web: HTML5 <video> ---------- */
 function WebVideo({ uri }: { uri: string }) {
   const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => { ref.current?.play().catch(() => {}); }, []);
+  useEffect(() => { ref.current?.play().catch(() => { }); }, []);
   return (
     <video
       ref={ref as any}
@@ -69,15 +69,15 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { width: SCREEN_W } = useWindowDimensions();
 
-  useEffect(() => { 
-    fetchEvents(); 
+  useEffect(() => {
+    fetchEvents();
     fetchCart();
   }, [fetchEvents, fetchCart]);
 
   // Just using the same event list for placeholders, randomly shuffling or slicing
   const trendingEvents = events.slice(0, 5);
   const liveMusicEvents = [...events].reverse().slice(0, 5);
-  const workshopEvents = events.length > 2 ? [events[0], events[2], ...events.slice(1,2)] : events;
+  const workshopEvents = events.length > 2 ? [events[0], events[2], ...events.slice(1, 2)] : events;
 
   // Render a horizontal event card
   const renderHorizontalCard = ({ item }: { item: EventItem }) => {
@@ -177,8 +177,8 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
         style={{ width: SCREEN_W }}
       >
@@ -203,7 +203,7 @@ export default function HomeScreen() {
         {renderSection('Nhạc sống', liveMusicEvents)}
         {renderSection('Hội thảo & Workshop', workshopEvents)}
         {renderSection('Sân khấu & Nghệ thuật', trendingEvents)}
-        
+
       </ScrollView>
     </ThemedView>
   );
