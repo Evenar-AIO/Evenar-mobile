@@ -12,7 +12,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import EventCard from '../components/EventCard';
 import { EventItem } from '../types/event.type';
-import { deleteEvent, getEvents } from '../services/event.service';
+import { deleteEvent, getMyEvents } from '../services/event.service';
 
 export default function MyEventsScreen() {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -21,7 +21,7 @@ export default function MyEventsScreen() {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const data = await getEvents();
+      const data: any = await getMyEvents();
       // Handle array or object response
       setEvents(Array.isArray(data) ? data : (data?.data ?? []));
     } catch (error: any) {

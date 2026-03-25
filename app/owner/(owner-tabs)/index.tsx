@@ -94,8 +94,7 @@ export default function OwnerDashboardScreen() {
           <View style={s.actionRow}>
             <QuickBtn icon="albums-outline" label="Sự kiện" color="#10B981" onPress={() => router.push('/owner/event')} />
             <QuickBtn icon="add-circle-outline" label="Tạo mới" color="#F59E0B" onPress={() => router.push('/owner/event/create')} />
-            <QuickBtn icon="people-outline" label="Khách" color="#6366F1" onPress={() => { }} />
-            <QuickBtn icon="send-outline" label="Yêu cầu" color="#EC4899" onPress={() => { }} />
+            <QuickBtn icon="help-buoy-outline" label="Yêu cầu" color="#EC4899" onPress={() => router.push('/support/new')} />
           </View>
         </View>
 

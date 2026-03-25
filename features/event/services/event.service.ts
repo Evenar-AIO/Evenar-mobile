@@ -5,6 +5,11 @@ export const getEvents = async () => {
   return res.data;
 };
 
+export const getMyEvents = async () => {
+  const res = await api.get('/events/my');
+  return res.data;
+};
+
 export const getEventById = async (id: string) => {
   const res = await api.get(`/events/${id}`);
   return res.data;

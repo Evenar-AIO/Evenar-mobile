@@ -7,7 +7,7 @@ interface AuthButtonProps {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'cta';
   style?: ViewStyle;
 }
 
@@ -19,8 +19,29 @@ export function AuthButton({
   variant = 'primary',
   style,
 }: AuthButtonProps) {
-  const isPrimary = variant === 'primary';
   const isDisabled = disabled || loading;
+
+  const getVariantStyle = () => {
+    switch (variant) {
+      case 'secondary':
+        return styles.secondary;
+      case 'cta':
+        return styles.cta;
+      default:
+        return styles.primary;
+    }
+  };
+
+  const getTextStyle = () => {
+    switch (variant) {
+      case 'secondary':
+        return styles.secondaryText;
+      case 'cta':
+        return styles.ctaText;
+      default:
+        return styles.primaryText;
+    }
+  };
 
   return (
     <Pressable
@@ -28,15 +49,15 @@ export function AuthButton({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.button,
-        isPrimary ? styles.primary : styles.secondary,
+        getVariantStyle(),
         isDisabled ? styles.disabled : null,
         pressed && !isDisabled ? styles.pressed : null,
         style,
       ]}>
       {loading ? (
-        <ActivityIndicator color={isPrimary ? '#FFFFFF' : '#6C5CE7'} />
+        <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#22C55E'} />
       ) : (
-        <ThemedText style={[styles.text, isPrimary ? styles.primaryText : styles.secondaryText]}>
+        <ThemedText style={[styles.text, getTextStyle()]}>
           {title}
         </ThemedText>
       )}
@@ -46,35 +67,44 @@ export function AuthButton({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 48,
+    height: 52,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+    marginVertical: 4,
   },
   primary: {
-    backgroundColor: '#6C5CE7',
+    backgroundColor: '#7C3AED', // Brand Purple
   },
   secondary: {
-    borderWidth: 1,
-    borderColor: '#6C5CE7',
-    backgroundColor: '#F1EEFF',
+    borderWidth: 1.5,
+    borderColor: '#334155',
+    backgroundColor: '#1E293B',
+  },
+  cta: {
+    backgroundColor: '#F97316', // Brand Orange
   },
   disabled: {
-    opacity: 0.6,
+    opacity: 0.5,
+    backgroundColor: '#334155',
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
   },
   text: {
     fontSize: 16,
-    lineHeight: 22,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   primaryText: {
     color: '#FFFFFF',
   },
   secondaryText: {
-    color: '#6C5CE7',
+    color: '#F8FAFC',
+  },
+  ctaText: {
+    color: '#FFFFFF',
   },
 });

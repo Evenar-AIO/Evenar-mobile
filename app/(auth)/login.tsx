@@ -1,9 +1,9 @@
-import * as Linking from 'expo-linking';
-import * as WebBrowser from 'expo-web-browser';
-import { WebView } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Modal, SafeAreaView, Text, Platform } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Modal, SafeAreaView, Text, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 import { AuthButton } from '@/features/auth/components/AuthButton';
 import { AuthFormField } from '@/features/auth/components/AuthFormField';
@@ -93,8 +93,6 @@ export default function LoginScreen() {
 
       if (response.url) {
         if (Platform.OS === 'web') {
-          // On Web, use direct redirect instead of popup to avoid "new tab" desync issues.
-          // The useEffect at the top will handle the token when we redirect back.
           window.location.href = response.url;
           return;
         }
@@ -112,8 +110,6 @@ export default function LoginScreen() {
 
   const handleGoogleNavigation = async (navState: any) => {
     const urlStr = navState.url;
-    
-    // Detect completion by checking for token in query params
     const hasToken = urlStr.includes('token=');
     const hasRole = urlStr.includes('role=');
 
@@ -127,14 +123,10 @@ export default function LoginScreen() {
         const roleStr = roleMatch ? roleMatch[1] : 'customer';
         
         setGlobalError(null);
-        // We temporarily don't have the user object yet, so we fetch it
         try {
-            // Set token manually for the immediate getMe call
             const { setAuthToken: setToken } = await import('@/services/apiClient');
             setToken(token);
-            
             const userInfo: any = await authService.getMe();
-            // User info might be in userInfo.data based on API structure
             const realUser = userInfo?.id ? userInfo : userInfo?.data;
             
             await setSession({ 
@@ -157,58 +149,102 @@ export default function LoginScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <StatusBar style="light" translucent backgroundColor="transparent" />
+      
+      {/* Header with Illustration & Title */}
       <View style={styles.header}>
-        <ThemedText type="title" style={styles.title}>
-          Đăng nhập
-        </ThemedText>
-        <ThemedText style={styles.subtitle}>Đăng nhập để tiếp tục quản lý vé sự kiện.</ThemedText>
-      </View>
-
-      <View style={styles.form}>
-        <AuthFormField
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          error={errors.email}
-          placeholder="you@example.com"
-        />
-
-        <AuthFormField
-          label="Mật khẩu"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          error={errors.password}
-          placeholder="Nhập mật khẩu"
-        />
-
-        <TouchableOpacity onPress={() => router.push('/forgot-password')}>
-          <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
-        </TouchableOpacity>
-
-        {globalError ? <ThemedText style={styles.errorText}>{globalError}</ThemedText> : null}
-
-        <AuthButton title="Đăng nhập" onPress={onLogin} loading={state.loading} />
-        <AuthButton title="Đăng nhập với Google" onPress={onGoogleLogin} variant="secondary" />
-      </View>
-
-      <View style={styles.footer}>
-        <ThemedText>Bạn chưa có tài khoản? </ThemedText>
-        <Link href="/signup-role" asChild>
-          <TouchableOpacity>
-            <ThemedText style={styles.linkText}>Đăng ký</ThemedText>
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#FFFFFF" />
           </TouchableOpacity>
-        </Link>
+        </View>
+        <View style={styles.headerContent}>
+          <ThemedText style={styles.headerTitle}>Đăng nhập</ThemedText>
+          <View style={styles.dogContainer}>
+             <Ionicons name="paw" size={60} color="#FACC15" />
+          </View>
+        </View>
       </View>
+
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formContainer}>
+            <AuthFormField
+              label="Email hoặc số điện thoại"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              error={errors.email}
+              placeholder="Nhập email hoặc số điện thoại"
+            />
+
+            <AuthFormField
+              label="Mật khẩu"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              error={errors.password}
+              placeholder="Nhập mật khẩu"
+            />
+
+            <TouchableOpacity 
+              onPress={() => router.push('/forgot-password')}
+              style={styles.forgotPasswordButton}
+            >
+              <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
+            </TouchableOpacity>
+
+            {globalError ? <ThemedText style={styles.errorText}>{globalError}</ThemedText> : null}
+
+            <View style={styles.buttonGroup}>
+              <AuthButton 
+                title="Đăng nhập" 
+                onPress={onLogin} 
+                loading={state.loading} 
+              />
+              
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <ThemedText style={styles.dividerText}>Hoặc</ThemedText>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <AuthButton 
+                title="Đăng nhập bằng Google" 
+                onPress={onGoogleLogin} 
+                variant="secondary"
+              />
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <ThemedText style={styles.footerText}>Chưa có tài khoản? </ThemedText>
+            <Link href="/signup-role" asChild>
+              <TouchableOpacity>
+                <ThemedText style={styles.footerLink}>Tạo tài khoản ngay</ThemedText>
+              </TouchableOpacity>
+            </Link>
+          </View>
+          
+          <ThemedText style={styles.legalText}>
+            Bằng việc tiếp tục, bạn đã đọc và đồng ý với <ThemedText style={styles.legalLink}>Điều khoản sử dụng</ThemedText> và <ThemedText style={styles.legalLink}>Chính sách bảo mật</ThemedText>.
+          </ThemedText>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       {Platform.OS !== 'web' && (
         <Modal visible={showGoogleAuth} animationType="slide" presentationStyle="pageSheet">
-          <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+          <SafeAreaView style={{ flex: 1, backgroundColor: '#0F172A' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', padding: 16 }}>
               <TouchableOpacity onPress={() => setShowGoogleAuth(false)}>
-                <Text style={{ fontSize: 16, color: '#007AFF', fontWeight: '600' }}>Hủy</Text>
+                <Text style={{ fontSize: 16, color: '#22C55E', fontWeight: '700' }}>HỦY</Text>
               </TouchableOpacity>
             </View>
             {googleAuthUrl && (
@@ -216,7 +252,6 @@ export default function LoginScreen() {
                 source={{ uri: googleAuthUrl }}
                 onNavigationStateChange={handleGoogleNavigation}
                 startInLoadingState
-                incognito={true}
               />
             )}
           </SafeAreaView>
@@ -229,35 +264,115 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingVertical: 36,
-    gap: 24,
+    backgroundColor: '#020617', // Main Dark Background
+  },
+  keyboardView: {
+    flex: 1,
   },
   header: {
-    gap: 8,
+    backgroundColor: '#7C3AED', // Brand Purple Header
+    paddingTop: 50,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  title: {
-    fontSize: 30,
-    lineHeight: 34,
+  headerTop: {
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#9AA4B2',
-  },
-  form: {
-    gap: 14,
-  },
-  linkText: {
-    color: '#6C5CE7',
-    fontWeight: '600',
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 13,
-  },
-  footer: {
-    flexDirection: 'row',
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  dogContainer: {
+    marginRight: -10,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+  formContainer: {
+    gap: 12,
+  },
+  forgotPasswordButton: {
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  linkText: {
+    color: '#94A3B8',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 24,
+    gap: 4,
+  },
+  footerText: {
+    color: '#94A3B8',
+    fontSize: 14,
+  },
+  footerLink: {
+    color: '#7C3AED',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+  legalText: {
+    marginTop: 60,
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#64748B',
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: '#7C3AED',
+    textDecorationLine: 'underline',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: 12,
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  buttonGroup: {
+    gap: 16,
+    marginTop: 20,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#1E293B',
+  },
+  dividerText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
   },
 });

@@ -101,9 +101,9 @@ export default function HomeScreen() {
       >
         <View style={styles.cardImgWrap}>
           {item.imageURL ? (
-            <Image 
-              source={{ uri: item.imageURL }} 
-              style={styles.cardImg} 
+            <Image
+              source={{ uri: item.imageURL }}
+              style={styles.cardImg}
               resizeMode="cover"
             />
           ) : (
@@ -162,7 +162,7 @@ export default function HomeScreen() {
     <ThemedView style={[styles.root, { width: SCREEN_W }]}>
       {/* Custom Header */}
       <View style={[styles.header, { backgroundColor: palette.background, paddingTop: insets.top || 16 }]}>
-        <Text style={[styles.logoText, { color: palette.text }]}>combos</Text>
+        <Text style={[styles.logoText, { color: palette.text }]}>Evenar</Text>
         <View style={styles.headerIcons}>
           <Pressable style={[styles.iconBtn, { backgroundColor: palette.surface1 }]} onPress={() => router.push('/events')}>
             <Ionicons name="search" size={20} color={palette.text} />

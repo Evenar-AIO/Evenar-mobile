@@ -78,15 +78,6 @@ export default function OwnerTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="buyers"
-        options={{
-          title: 'Khách hàng',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'people' : 'people-outline'} size={22} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="messages"
         options={{
           headerShown: false,

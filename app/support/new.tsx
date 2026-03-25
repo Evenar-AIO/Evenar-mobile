@@ -16,7 +16,11 @@ export default function SupportNewScreen() {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async () => {
-    await submitTicket({ subject, message });
+    if (!subject.trim() || !message.trim()) {
+      alert('Vui lòng nhập đầy đủ tiêu đề và nội dung');
+      return;
+    }
+    await submitTicket({ subject, description: message });
     router.back();
   };
 

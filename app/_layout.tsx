@@ -66,18 +66,14 @@ function RootNavigation() {
     const inAuthGroup = segments[0] === '(auth)';
     const authScreen = typeof segments[1] === 'string' ? segments[1] : '';
     const isChangePasswordScreen = authScreen === 'change-password';
+    const isLanding = !segments[0];
 
-    if (!state.isAuthenticated && isChangePasswordScreen) {
+    if (!state.isAuthenticated && !inAuthGroup && !isLanding) {
       router.replace('/login');
       return;
     }
 
-    if (!state.isAuthenticated && !inAuthGroup) {
-      router.replace('/login');
-      return;
-    }
-
-    if (state.isAuthenticated && inAuthGroup && !isChangePasswordScreen) {
+    if (state.isAuthenticated && (inAuthGroup || isLanding) && !isChangePasswordScreen) {
       if (state.user?.role === 'admin') {
         router.replace('/admin');
       } else if (state.user?.role === 'organizer' || state.user?.role === 'event_owner') {
@@ -111,6 +107,7 @@ function RootNavigation() {
     return (
         <ThemeProvider value={customDarkTheme}>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="events/[id]" options={{ title: 'Event' }} />

@@ -136,9 +136,9 @@ export default function CreateEventScreen() {
     }
 
     if (tickets.length === 0) {
-        const msg = 'Vui lòng thêm ít nhất 1 loại vé';
-        Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Lỗi', msg);
-        return;
+      const msg = 'Vui lòng thêm ít nhất 1 loại vé';
+      Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Lỗi', msg);
+      return;
     }
 
     setLoading(true);
@@ -203,68 +203,68 @@ export default function CreateEventScreen() {
           {/* 📅 Date/Time Card */}
           <View style={s.card}>
             <View style={s.row}>
-                <View style={s.halfField}>
-                    <Field label="Bắt đầu" icon="calendar-outline" required>
-                        {Platform.OS === 'web' ? (
-                        <input type="datetime-local" value={startDate ? startDate.toISOString().slice(0, 16) : ''} onChange={(e) => handleWebDateTimeChange('start', e.target.value)} style={webInputStyle} />
-                        ) : (
-                        <View style={s.dateRow}>
-                            <Pressable style={s.dateBtn} onPress={() => setShowPicker('startDate')}>
-                                <Text style={s.dateTxt}>{startDate ? formatDate(startDate) : 'Ngày'}</Text>
-                            </Pressable>
-                            <Pressable style={[s.dateBtn, { flex: 0.8 }]} onPress={() => setShowPicker('startTime')}>
-                                <Text style={s.dateTxt}>{startDate ? formatTime(startDate) : 'Giờ'}</Text>
-                            </Pressable>
-                        </View>
-                        )}
-                    </Field>
-                </View>
-                <View style={s.halfField}>
-                    <Field label="Kết thúc" icon="calendar-outline" required>
-                        {Platform.OS === 'web' ? (
-                        <input type="datetime-local" value={endDate ? endDate.toISOString().slice(0, 16) : ''} onChange={(e) => handleWebDateTimeChange('end', e.target.value)} style={webInputStyle} />
-                        ) : (
-                        <View style={s.dateRow}>
-                            <Pressable style={s.dateBtn} onPress={() => setShowPicker('endDate')}>
-                                <Text style={s.dateTxt}>{endDate ? formatDate(endDate) : 'Ngày'}</Text>
-                            </Pressable>
-                            <Pressable style={[s.dateBtn, { flex: 0.8 }]} onPress={() => setShowPicker('endTime')}>
-                                <Text style={s.dateTxt}>{endDate ? formatTime(endDate) : 'Giờ'}</Text>
-                            </Pressable>
-                        </View>
-                        )}
-                    </Field>
-                </View>
+              <View style={s.halfField}>
+                <Field label="Bắt đầu" icon="calendar-outline" required>
+                  {Platform.OS === 'web' ? (
+                    <input type="datetime-local" value={startDate ? startDate.toISOString().slice(0, 16) : ''} onChange={(e) => handleWebDateTimeChange('start', e.target.value)} style={webInputStyle} />
+                  ) : (
+                    <View style={s.dateRow}>
+                      <Pressable style={s.dateBtn} onPress={() => setShowPicker('startDate')}>
+                        <Text style={s.dateTxt}>{startDate ? formatDate(startDate) : 'Ngày'}</Text>
+                      </Pressable>
+                      <Pressable style={[s.dateBtn, { flex: 0.8 }]} onPress={() => setShowPicker('startTime')}>
+                        <Text style={s.dateTxt}>{startDate ? formatTime(startDate) : 'Giờ'}</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </Field>
+              </View>
+              <View style={s.halfField}>
+                <Field label="Kết thúc" icon="calendar-outline" required>
+                  {Platform.OS === 'web' ? (
+                    <input type="datetime-local" value={endDate ? endDate.toISOString().slice(0, 16) : ''} onChange={(e) => handleWebDateTimeChange('end', e.target.value)} style={webInputStyle} />
+                  ) : (
+                    <View style={s.dateRow}>
+                      <Pressable style={s.dateBtn} onPress={() => setShowPicker('endDate')}>
+                        <Text style={s.dateTxt}>{endDate ? formatDate(endDate) : 'Ngày'}</Text>
+                      </Pressable>
+                      <Pressable style={[s.dateBtn, { flex: 0.8 }]} onPress={() => setShowPicker('endTime')}>
+                        <Text style={s.dateTxt}>{endDate ? formatTime(endDate) : 'Giờ'}</Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </Field>
+              </View>
             </View>
           </View>
 
           {/* 🎫 Ticket Tiers */}
           <View style={s.card}>
             <View style={s.secHeader}>
-                <Text style={s.secTitle}>Phân loại vé</Text>
-                <Pressable onPress={addTicket} style={s.addBtn}>
-                    <Ionicons name="add" size={16} color="#10B981" />
-                    <Text style={s.addBtnTxt}>Thêm loại vé</Text>
-                </Pressable>
+              <Text style={s.secTitle}>Phân loại vé</Text>
+              <Pressable onPress={addTicket} style={s.addBtn}>
+                <Ionicons name="add" size={16} color="#10B981" />
+                <Text style={s.addBtnTxt}>Thêm loại vé</Text>
+              </Pressable>
             </View>
 
             {tickets.map((t, i) => (
-                <View key={i} style={s.ticketTier}>
-                    <View style={s.row}>
-                        <View style={{ flex: 1.5 }}>
-                            <TextInput style={s.miniInput} value={t.type} onChangeText={(v) => updateTicket(i, 'type', v)} placeholder="VD: Vé VIP" placeholderTextColor="#475569" />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <TextInput style={s.miniInput} value={t.price} onChangeText={(v) => updateTicket(i, 'price', v)} placeholder="Giá" placeholderTextColor="#475569" keyboardType="numeric" />
-                        </View>
-                        <View style={{ flex: 0.8 }}>
-                            <TextInput style={s.miniInput} value={t.quantity} onChangeText={(v) => updateTicket(i, 'quantity', v)} placeholder="SL" placeholderTextColor="#475569" keyboardType="numeric" />
-                        </View>
-                        <Pressable onPress={() => removeTicket(i)} style={s.delBtn}>
-                            <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                        </Pressable>
-                    </View>
+              <View key={i} style={s.ticketTier}>
+                <View style={s.row}>
+                  <View style={{ flex: 1.5 }}>
+                    <TextInput style={s.miniInput} value={t.type} onChangeText={(v) => updateTicket(i, 'type', v)} placeholder="VD: Vé VIP" placeholderTextColor="#475569" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <TextInput style={s.miniInput} value={t.price} onChangeText={(v) => updateTicket(i, 'price', v)} placeholder="Giá" placeholderTextColor="#475569" keyboardType="numeric" />
+                  </View>
+                  <View style={{ flex: 0.8 }}>
+                    <TextInput style={s.miniInput} value={t.quantity} onChangeText={(v) => updateTicket(i, 'quantity', v)} placeholder="SL" placeholderTextColor="#475569" keyboardType="numeric" />
+                  </View>
+                  <Pressable onPress={() => removeTicket(i)} style={s.delBtn}>
+                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                  </Pressable>
                 </View>
+              </View>
             ))}
           </View>
 
@@ -290,7 +290,7 @@ export default function CreateEventScreen() {
             {loading ? <ActivityIndicator size="small" color="#fff" /> : (
               <>
                 <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                <Text style={s.submitTxt}>Cầu cứu Admin Duyệt</Text>
+                <Text style={s.submitTxt}>Gửi yêu cầu duyệt</Text>
               </>
             )}
           </Pressable>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View, ScrollView, Text, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, ScrollView, Text, useWindowDimensions, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ownerService } from '@/features/owner/services/owner.service';
 
@@ -7,31 +7,57 @@ export default function OwnerAnalyticsScreen() {
   const { width: W } = useWindowDimensions();
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchingPeriod, setFetchingPeriod] = useState(false);
+  const [periodIndex, setPeriodIndex] = useState(0); // Default to 7 days
+  const periodValues = [7, 30, 180, 365];
+  const periodLabels = ['7 ngày', '1 tháng', '6 tháng', '1 năm'];
+
+  const loadData = async (idx?: number) => {
+    const isInitial = idx === undefined;
+    if (isInitial) setLoading(true);
+    else setFetchingPeriod(true);
+
+    try {
+      const activeIdx = idx !== undefined ? idx : periodIndex;
+      const data: any = await ownerService.getAnalytics(periodValues[activeIdx]);
+      setMetrics(data.data || data);
+    } finally {
+      setLoading(false);
+      setFetchingPeriod(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try { setMetrics(await ownerService.getAnalytics()); } finally { setLoading(false); }
-    })();
+    loadData();
   }, []);
+
+  const handlePeriodChange = (idx: number) => {
+    if (idx === periodIndex || fetchingPeriod) return;
+    setPeriodIndex(idx);
+    loadData(idx);
+  };
 
   if (loading) {
     return <View style={s.loadWrap}><ActivityIndicator size="large" color="#10B981" /></View>;
   }
 
   const cards = [
-    { label: 'Doanh thu tuần', val: metrics?.weeklyRevenue ?? '₫0', icon: 'cash-outline' as const, color: '#10B981', bg: 'rgba(16,185,129,0.12)', trend: '+8%' },
-    { label: 'Tỉ lệ chuyển đổi', val: metrics?.conversionRate ?? '0%', icon: 'swap-horizontal-outline' as const, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', trend: '+2.3%' },
+    { label: 'Doanh thu', val: metrics?.weeklyRevenue ?? '₫0', icon: 'cash-outline' as const, color: '#10B981', bg: 'rgba(16,185,129,0.12)', trend: '+8%' },
     { label: 'Giá vé TB', val: metrics?.avgTicketPrice ?? '₫0', icon: 'pricetag-outline' as const, color: '#6366F1', bg: 'rgba(99,102,241,0.12)', trend: '+5%' },
-    { label: 'Khách mới', val: metrics?.newCustomers ?? '0', icon: 'person-add-outline' as const, color: '#EC4899', bg: 'rgba(236,72,153,0.12)', trend: '+15' },
   ];
 
-  const cardW = (W - 48 - 12) / 2;
+  const cardW = (W - 40 - 12) / 2;
+
+  // Handle revenue trend scaling
+  const fallbackLength = periodIndex === 0 ? 7 : periodIndex === 1 ? 30 : periodIndex === 2 ? 6 : 12;
+  const trendData = metrics?.revenueTrend || Array(fallbackLength).fill(0);
+  const maxRev = Math.max(...trendData, 1000);
 
   return (
     <View style={s.root}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.scroll}>
 
-        {/* ── KPI 2×2 ── */}
+        {/* ── KPI Grid ── */}
         <View style={s.grid}>
           {cards.map((c) => (
             <View key={c.label} style={[s.card, { width: cardW }]}>
@@ -53,19 +79,31 @@ export default function OwnerAnalyticsScreen() {
         {/* ── Revenue Trend / Sparkline ── */}
         <View style={s.section}>
           <Text style={s.secTitle}>Xu hướng doanh thu</Text>
-          <Text style={s.secSub}>{metrics?.revenueNote ?? 'Phân tích theo thời gian thực'}</Text>
+          <Text style={s.secSub}>{metrics?.revenueNote ?? `Phân tích dựa trên ${periodLabels[periodIndex]} gần nhất`}</Text>
 
           <View style={s.sparkWrap}>
-            {[30, 50, 38, 62, 45, 78, 55, 85, 68, 95, 80, 100].map((h, i) => (
-              <View key={i} style={[s.sparkBar, { height: h * 0.85, backgroundColor: i >= 10 ? '#10B981' : '#1E293B' }]} />
-            ))}
+            {fetchingPeriod ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                   <ActivityIndicator color="#10B981" size="small" />
+                </View>
+            ) : (
+                trendData.map((val: number, i: number) => {
+                  const h = Math.max((val / maxRev) * 80, 4);
+                  return (
+                    <View 
+                      key={i} 
+                      style={[s.sparkBar, { height: h, backgroundColor: i === trendData.length - 1 ? '#10B981' : '#1E293B' }]} 
+                    />
+                  );
+                })
+            )}
           </View>
 
           <View style={s.periods}>
-            {['1 ngày', '7 ngày', '30 ngày', '90 ngày'].map((p, i) => (
-              <View key={p} style={[s.periodChip, i === 1 && s.periodActive]}>
-                <Text style={[s.periodTxt, i === 1 && s.periodTxtActive]}>{p}</Text>
-              </View>
+            {periodLabels.map((p, i) => (
+              <Pressable key={p} onPress={() => handlePeriodChange(i)} style={[s.periodChip, i === periodIndex && s.periodActive]}>
+                <Text style={[s.periodTxt, i === periodIndex && s.periodTxtActive]}>{p}</Text>
+              </Pressable>
             ))}
           </View>
         </View>
