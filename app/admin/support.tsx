@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+
+import { useFocusEffect } from 'expo-router';
 
 import { adminService } from '@/features/admin/services/admin.service';
 import { ThemedText } from '@/components/themed-text';
@@ -13,21 +15,25 @@ export default function AdminSupportScreen() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadSupport = async () => {
-      try {
-        const data = await adminService.getSupport({ page: 1, limit: 20 });
-        setTickets(data?.data ?? data ?? []);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSupport();
+  const loadSupport = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await adminService.getSupport({ page: 1, limit: 20 });
+      setTickets(data?.data ?? data ?? []);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSupport();
+    }, [loadSupport])
+  );
 
   const handleResolve = async (ticketId: string) => {
     await adminService.updateSupport(ticketId, { status: 'resolved' });
+    await loadSupport();
   };
 
   if (loading) {

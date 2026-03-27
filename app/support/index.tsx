@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -13,9 +13,11 @@ export default function SupportScreen() {
   const palette = Colors[theme];
   const { tickets, loading, fetchTickets } = useSupportStore();
 
-  useEffect(() => {
-    fetchTickets();
-  }, [fetchTickets]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTickets();
+    }, [fetchTickets])
+  );
 
   if (loading) {
     return (

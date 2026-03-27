@@ -336,15 +336,24 @@ export default function ProfileScreen() {
 
         {/* BENTO MENU GRID */}
         <View style={styles.menuGrid}>
-            <BentoCard 
-                icon="receipt-outline" 
-                title="Đơn hàng của tôi" 
+            <BentoCard
+                icon="receipt-outline"
+                title="Đơn hàng của tôi"
                 subtitle="Xem lịch sử giao dịch"
                 color="#22C55E"
                 onPress={() => router.push('/orders')}
                 fullWidth
             />
-            
+
+            <BentoCard
+                icon="help-buoy-outline"
+                title="Hỗ trợ"
+                subtitle="Xem và gửi yêu cầu"
+                color="#EC4899"
+                onPress={() => router.push('/support')}
+                fullWidth
+            />
+
             <View style={styles.row}>
                 <BentoCard 
                     icon="person-outline" 

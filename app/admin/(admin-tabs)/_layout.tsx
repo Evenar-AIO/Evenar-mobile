@@ -88,6 +88,16 @@ export default function AdminTabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="support"
+        options={{
+          title: 'Hỗ trợ',
+          tabBarLabel: 'Hỗ trợ',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="help-buoy-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

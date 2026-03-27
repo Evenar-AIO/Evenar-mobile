@@ -31,6 +31,8 @@ export const useSupportStore = create<SupportState>((set) => ({
     set({ loading: true });
     try {
       await supportService.submitTicket(payload);
+      const data: any = await supportService.listTickets();
+      set({ tickets: data?.data ?? data ?? [] });
     } finally {
       set({ loading: false });
     }
